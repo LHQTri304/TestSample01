@@ -61,10 +61,12 @@ int BackBufferWidth = 0;
 int BackBufferHeight = 0;
 
 #define TEXTURE_PATH_BRICK L"brick.png"
+#define TEXTURE_PATH_POOLBALL L"poolball.png"
 #define BRICK_START_X 8.0f
 #define BRICK_START_Y 200.0f
 
 #define BRICK_START_VX 0.2f
+#define BRICK_START_VY 0.2f
 
 #define BRICK_WIDTH 16.0f
 #define BRICK_HEIGHT 16.0f
@@ -78,6 +80,7 @@ D3DX10_SPRITE spriteBrick;
 float brick_x = BRICK_START_X;
 float brick_vx = BRICK_START_VX;
 float brick_y = BRICK_START_Y;
+float brick_vy = BRICK_START_VY;
 
 
 LRESULT CALLBACK WinProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
@@ -271,7 +274,7 @@ void LoadResources()
 
 	// Loads the texture into a temporary ID3D10Resource object
 	HRESULT hr = D3DX10CreateTextureFromFile(pD3DDevice,
-		TEXTURE_PATH_BRICK,
+		TEXTURE_PATH_POOLBALL,
 		NULL,
 		NULL,
 		&pD3D10Resource,
@@ -280,7 +283,7 @@ void LoadResources()
 	// Make sure the texture was loaded successfully
 	if (FAILED(hr))
 	{
-		DebugOut((wchar_t*)L"[ERROR] Failed to load texture file: %s \n", TEXTURE_PATH_BRICK);
+		DebugOut((wchar_t*)L"[ERROR] Failed to load texture file: %s \n", TEXTURE_PATH_POOLBALL);
 		return;
 	}
 
@@ -331,7 +334,7 @@ void LoadResources()
 	spriteBrick.ColorModulate = D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f);
 
 
-	DebugOut((wchar_t*)L"[INFO] Texture loaded Ok: %s \n", TEXTURE_PATH_BRICK);
+	DebugOut((wchar_t*)L"[INFO] Texture loaded Ok: %s \n", TEXTURE_PATH_POOLBALL);
 }
 
 /*
@@ -345,14 +348,21 @@ void Update(DWORD dt)
 	//Uncomment the whole function to see the brick moves and bounces back when hitting left and right edges
 	//brick_x++;
 
-	brick_x += brick_vx*dt; 
+	brick_x += brick_vx * dt;
+	brick_y += brick_vy * dt; 
 
 	// NOTE: BackBufferWidth is indeed related to rendering!!
 	float right_edge = BackBufferWidth - BRICK_WIDTH;
+	float down_edge = BackBufferHeight - BRICK_HEIGHT;
 
 	if (brick_x < 0 || brick_x > right_edge) {
 
 		brick_vx = -brick_vx;
+	}
+
+	if (brick_y < 0 || brick_y > down_edge) {
+
+		brick_vy = -brick_vy;
 
 		//	//Why not having these logics would make the brick disappear sometimes?  
 		////	if (brick_x < 0)
@@ -397,7 +407,7 @@ void Render()
 		// Finish up and send the sprites to the hardware
 		spriteObject->End();
 
-		//DebugOutTitle((wchar_t*)L"%s (%0.1f,%0.1f) v:%0.1f", WINDOW_TITLE, brick_x, brick_y, brick_vx);
+		//DebugOutTitle((wchar_t*)L"%s (%0.1f,%0.1f) v:%0.1f", WINDOW_TITLE, brick_x, brick_y, brick_vy);
 
 		// display the next item in the swap chain
 		pSwapChain->Present(0, 0);
