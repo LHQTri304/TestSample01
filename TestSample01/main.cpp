@@ -7,7 +7,7 @@ This sample illustrates how to:
 
 1/ Create a window
 2/ Initiate Direct3D 10, DirectX Sprite
-3/ Draw a static brick sprite to the screen
+3/ Draw a static ball sprite to the screen
 4/ Create frame rate independent movements
 
 5/ Some good C++ programming practices
@@ -60,27 +60,26 @@ ID3D10RenderTargetView* pRenderTargetView = NULL;
 int BackBufferWidth = 0;
 int BackBufferHeight = 0;
 
-#define TEXTURE_PATH_BRICK L"brick.png"
-#define TEXTURE_PATH_POOLBALL L"poolball.png"
-#define BRICK_START_X 8.0f
-#define BRICK_START_Y 200.0f
+#define TEXTURE_PATH_BALL L"poolball.png"
+#define BALL_START_X 1.0f
+#define BALL_START_Y 1.0f
 
-#define BRICK_START_VX 0.2f
-#define BRICK_START_VY 0.2f
+#define BALL_START_VX 0.2f
+#define BALL_START_VY 0.2f
 
-#define BRICK_WIDTH 16.0f
-#define BRICK_HEIGHT 16.0f
+#define BALL_WIDTH 32.0f
+#define BALL_HEIGHT 32.0f
 
 
-ID3D10Texture2D* texBrick = NULL;				// Texture object to store brick image
+ID3D10Texture2D* texBall = NULL;				// Texture object to store ball image
 ID3DX10Sprite* spriteObject = NULL;				// Sprite handling object 
 
-D3DX10_SPRITE spriteBrick;
+D3DX10_SPRITE spriteBall;
 
-float brick_x = BRICK_START_X;
-float brick_vx = BRICK_START_VX;
-float brick_y = BRICK_START_Y;
-float brick_vy = BRICK_START_VY;
+float ball_x = BALL_START_X;
+float ball_vx = BALL_START_VX;
+float ball_y = BALL_START_Y;
+float ball_vy = BALL_START_VY;
 
 
 LRESULT CALLBACK WinProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
@@ -170,9 +169,9 @@ void InitDirectX(HWND hWnd)
 	}
 
 	IDXGIAdapter* pAdapter = NULL;
-	for (UINT i = 0; 
-			pFactory->EnumAdapters(i, &pAdapter) != DXGI_ERROR_NOT_FOUND; 
-     ++i) 
+	for (UINT i = 0;
+			pFactory->EnumAdapters(i, &pAdapter) != DXGI_ERROR_NOT_FOUND;
+	 ++i)
 	{
 		DXGI_ADAPTER_DESC adapterDesc;
 		pAdapter->GetDesc(&adapterDesc);
@@ -195,7 +194,7 @@ void InitDirectX(HWND hWnd)
 		_com_error err(hr);
 		LPCTSTR errMsg = err.ErrorMessage();
 
-		DebugOut((wchar_t*)L"[ERROR] D3D10CreateDeviceAndSwapChain has failed %s %d %d %s\n", _W(__FILE__), __LINE__, hr, errMsg );
+		DebugOut((wchar_t*)L"[ERROR] D3D10CreateDeviceAndSwapChain has failed %s %d %d %s\n", _W(__FILE__), __LINE__, hr, errMsg);
 		return;
 	}
 
@@ -266,7 +265,7 @@ void InitDirectX(HWND hWnd)
 }
 
 /*
-	Load game resources. In this example, we only load a brick image
+	Load game resources. In this example, we only load a ball image
 */
 void LoadResources()
 {
@@ -274,7 +273,7 @@ void LoadResources()
 
 	// Loads the texture into a temporary ID3D10Resource object
 	HRESULT hr = D3DX10CreateTextureFromFile(pD3DDevice,
-		TEXTURE_PATH_POOLBALL,
+		TEXTURE_PATH_BALL,
 		NULL,
 		NULL,
 		&pD3D10Resource,
@@ -283,22 +282,22 @@ void LoadResources()
 	// Make sure the texture was loaded successfully
 	if (FAILED(hr))
 	{
-		DebugOut((wchar_t*)L"[ERROR] Failed to load texture file: %s \n", TEXTURE_PATH_POOLBALL);
+		DebugOut((wchar_t*)L"[ERROR] Failed to load texture file: %s \n", TEXTURE_PATH_BALL);
 		return;
 	}
 
 	// Translates the ID3D10Resource object into a ID3D10Texture2D object
-	pD3D10Resource->QueryInterface(__uuidof(ID3D10Texture2D), (LPVOID*)&texBrick);
+	pD3D10Resource->QueryInterface(__uuidof(ID3D10Texture2D), (LPVOID*)&texBall);
 	pD3D10Resource->Release();
 
-	if (!texBrick) {
+	if (!texBall) {
 		DebugOut((wchar_t*)L"[ERROR] Failed to convert from ID3D10Resource to ID3D10Texture2D \n");
 		return;
 	}
 
 	// Get the texture details
 	D3D10_TEXTURE2D_DESC desc;
-	texBrick->GetDesc(&desc);
+	texBall->GetDesc(&desc);
 
 	// Create a shader resource view of the texture
 	D3D10_SHADER_RESOURCE_VIEW_DESC SRVDesc;
@@ -314,27 +313,27 @@ void LoadResources()
 
 	ID3D10ShaderResourceView* gSpriteTextureRV = NULL;
 
-	pD3DDevice->CreateShaderResourceView(texBrick, &SRVDesc, &gSpriteTextureRV);
+	pD3DDevice->CreateShaderResourceView(texBall, &SRVDesc, &gSpriteTextureRV);
 
 	// Set the sprite’s shader resource view
-	spriteBrick.pTexture = gSpriteTextureRV;
+	spriteBall.pTexture = gSpriteTextureRV;
 
 	// top-left location in U,V coords
-	spriteBrick.TexCoord.x = 0;
-	spriteBrick.TexCoord.y = 0;
+	spriteBall.TexCoord.x = 0;
+	spriteBall.TexCoord.y = 0;
 
 	// Determine the texture size in U,V coords
-	spriteBrick.TexSize.x = 1.0f;
-	spriteBrick.TexSize.y = 1.0f;
+	spriteBall.TexSize.x = 1.0f;
+	spriteBall.TexSize.y = 1.0f;
 
 	// Set the texture index. Single textures will use 0
-	spriteBrick.TextureIndex = 0;
+	spriteBall.TextureIndex = 0;
 
 	// The color to apply to this sprite, full color applies white.
-	spriteBrick.ColorModulate = D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f);
+	spriteBall.ColorModulate = D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f);
 
 
-	DebugOut((wchar_t*)L"[INFO] Texture loaded Ok: %s \n", TEXTURE_PATH_POOLBALL);
+	DebugOut((wchar_t*)L"[INFO] Texture loaded Ok: %s \n", TEXTURE_PATH_BALL);
 }
 
 /*
@@ -345,34 +344,46 @@ void LoadResources()
 */
 void Update(DWORD dt)
 {
-	//Uncomment the whole function to see the brick moves and bounces back when hitting left and right edges
-	//brick_x++;
+	//Uncomment the whole function to see the ball moves and bounces back when hitting left and right edges
+	//ball_x++;
 
-	brick_x += brick_vx * dt;
-	brick_y += brick_vy * dt; 
+	ball_x += ball_vx * dt;
+	ball_y += ball_vy * dt;
 
 	// NOTE: BackBufferWidth is indeed related to rendering!!
-	float right_edge = BackBufferWidth - BRICK_WIDTH;
-	float down_edge = BackBufferHeight - BRICK_HEIGHT;
+	float right_edge = BackBufferWidth - BALL_WIDTH/2;
+	float bottom_edge = BackBufferHeight - BALL_HEIGHT/2;
 
-	if (brick_x < 0 || brick_x > right_edge) {
+	//Bounce when touch the edge
+	if (ball_x < 16 || ball_x > right_edge) 
+	{
+		ball_vx = -ball_vx;
 
-		brick_vx = -brick_vx;
+		//Why not having these logics would make the ball disappear sometimes?  
+		// Because if the ball move so fast, even if we minus vx or vy, it can't come back.
+		if (ball_x < 16)
+		{
+			ball_x = 16;
+		}
+		else if (ball_x > right_edge )
+		{
+			ball_x = right_edge;
+		}
 	}
+	if (ball_y < 16 || ball_y > bottom_edge)
+	{
+		ball_vy = -ball_vy;
 
-	if (brick_y < 0 || brick_y > down_edge) {
-
-		brick_vy = -brick_vy;
-
-		//	//Why not having these logics would make the brick disappear sometimes?  
-		////	if (brick_x < 0)
-		////	{
-		////		brick_x = 0;
-		////	}
-		////	else if (brick_x > right_edge )
-		////	{
-		////		brick_x = right_edge;
-		////	}
+		//Why not having these logics would make the ball disappear sometimes?  
+		// Because if the ball move so fast, even if we minus vx or vy, it can't come back.
+		if (ball_y < 16)
+		{
+			ball_y = 16;
+		}
+		else if (ball_y > bottom_edge)
+		{
+			ball_y = bottom_edge;
+		}
 	}
 }
 
@@ -393,21 +404,21 @@ void Render()
 		// The translation matrix to be created
 		D3DXMATRIX matTranslation;
 		// Create the translation matrix
-		D3DXMatrixTranslation(&matTranslation, brick_x, (BackBufferHeight - brick_y), 0.1f);
+		D3DXMatrixTranslation(&matTranslation, ball_x, (BackBufferHeight - ball_y), 0.1f);
 
 		// Scale the sprite to its correct width and height
 		D3DXMATRIX matScaling;
-		D3DXMatrixScaling(&matScaling, BRICK_WIDTH, BRICK_HEIGHT, 1.0f);
+		D3DXMatrixScaling(&matScaling, BALL_WIDTH, BALL_HEIGHT, 1.0f);
 
 		// Setting the sprite’s position and size
-		spriteBrick.matWorld = (matScaling * matTranslation);
+		spriteBall.matWorld = (matScaling * matTranslation);
 
-		spriteObject->DrawSpritesImmediate(&spriteBrick, 1, 0, 0);
+		spriteObject->DrawSpritesImmediate(&spriteBall, 1, 0, 0);
 
 		// Finish up and send the sprites to the hardware
 		spriteObject->End();
 
-		//DebugOutTitle((wchar_t*)L"%s (%0.1f,%0.1f) v:%0.1f", WINDOW_TITLE, brick_x, brick_y, brick_vy);
+		//DebugOutTitle((wchar_t*)L"%s (%0.1f,%0.1f) v:%0.1f", WINDOW_TITLE, ball_x, ball_y, ball_vx);
 
 		// display the next item in the swap chain
 		pSwapChain->Present(0, 0);
