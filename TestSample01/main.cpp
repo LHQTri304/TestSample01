@@ -39,6 +39,8 @@ WARNING: This one file example has a hell LOT of *sinful* programming practices
 
 #include <comdef.h>
 
+#include "CPBall.h"
+
 #define WINDOW_CLASS_NAME L"SampleWindow"
 #define WINDOW_TITLE L"00 - Intro"
 #define WINDOW_ICON_PATH L"brick.ico" 
@@ -58,11 +60,11 @@ IDXGISwapChain* pSwapChain = NULL;
 ID3D10RenderTargetView* pRenderTargetView = NULL;
 
 int BackBufferWidth = 0;
-int BackBufferHeight = 0;
+int BackBufferHeight = 0; 
 
 #define TEXTURE_PATH_BALL L"poolball.png"
-#define BALL_START_X 1.0f
-#define BALL_START_Y 1.0f
+#define BALL_START_X 50.0f
+#define BALL_START_Y 50.0f
 
 #define BALL_START_VX 0.2f
 #define BALL_START_VY 0.2f
@@ -76,10 +78,23 @@ ID3DX10Sprite* spriteObject = NULL;				// Sprite handling object
 
 D3DX10_SPRITE spriteBall;
 
+/*
 float ball_x = BALL_START_X;
 float ball_vx = BALL_START_VX;
 float ball_y = BALL_START_Y;
 float ball_vy = BALL_START_VY;
+*/
+
+//Set basic stat for[2] ball
+#define NUM_OF_BALLS 2
+CPBall balls[NUM_OF_BALLS];
+void TestingBall()
+{
+	for (int i = 0; i < NUM_OF_BALLS; i++)
+	{
+		balls[i].SetAllStats(BALL_START_X, BALL_START_VX, BALL_START_Y, BALL_START_VY);
+	}
+}
 
 
 LRESULT CALLBACK WinProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
@@ -347,14 +362,24 @@ void Update(DWORD dt)
 	//Uncomment the whole function to see the ball moves and bounces back when hitting left and right edges
 	//ball_x++;
 
+	/*
 	ball_x += ball_vx * dt;
 	ball_y += ball_vy * dt;
+	*/
+
+	//balls[1].MoveX(10);
+	//balls[1].MoveY(10);
+	balls[1].MoveX(balls[1].GetVX() * dt);
+	balls[1].MoveY(balls[1].GetVY() * dt);
+	
 
 	// NOTE: BackBufferWidth is indeed related to rendering!!
 	float right_edge = BackBufferWidth - BALL_WIDTH/2;
 	float bottom_edge = BackBufferHeight - BALL_HEIGHT/2;
 
 	//Bounce when touch the edge
+
+	/*
 	if (ball_x < 16 || ball_x > right_edge) 
 	{
 		ball_vx = -ball_vx;
@@ -374,8 +399,6 @@ void Update(DWORD dt)
 	{
 		ball_vy = -ball_vy;
 
-		//Why not having these logics would make the ball disappear sometimes?  
-		// Because if the ball move so fast, even if we minus vx or vy, it can't come back.
 		if (ball_y < 16)
 		{
 			ball_y = 16;
@@ -384,6 +407,23 @@ void Update(DWORD dt)
 		{
 			ball_y = bottom_edge;
 		}
+	}*/
+
+	if (balls[1].GetX() < 16 || balls[1].GetX() > right_edge)
+	{
+		//balls[1].MinusVX();
+		balls[1].SetVX(-1);
+
+		if (balls[1].GetX() < 16)	{ balls[1].SetX(16);}
+		else if (balls[1].GetX() > right_edge)	{ balls[1].SetX(right_edge);}
+	}
+	if (balls[1].GetY() < 16 || balls[1].GetY() > bottom_edge)
+	{
+		//balls[1].MinusVY();
+		balls[1].SetVY(-1);
+
+		if (balls[1].GetY() < 16)	{ balls[1].SetY(16);}
+		else if (balls[1].GetY() > bottom_edge)	{ balls[1].SetY(bottom_edge);}
 	}
 }
 
@@ -404,7 +444,8 @@ void Render()
 		// The translation matrix to be created
 		D3DXMATRIX matTranslation;
 		// Create the translation matrix
-		D3DXMatrixTranslation(&matTranslation, ball_x, (BackBufferHeight - ball_y), 0.1f);
+		/*D3DXMatrixTranslation(&matTranslation, ball_x, (BackBufferHeight - ball_y), 0.1f);*/
+		D3DXMatrixTranslation(&matTranslation, balls[1].GetX(), (BackBufferHeight - balls[1].GetY()), 0.1f);
 
 		// Scale the sprite to its correct width and height
 		D3DXMATRIX matScaling;

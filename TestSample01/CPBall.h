@@ -7,7 +7,7 @@ private:
 	float y;
 	float vy;
 public:
-	CPBall(float, float, float, float);
+	//CPBall(float, float, float, float);
 
 	float GetX();
 	float GetY();
@@ -18,6 +18,8 @@ public:
 	void SetY(float);
 	void SetVX(float);
 	void SetVY(float);
+
+	void SetAllStats(float, float, float, float);
 
 	void MoveX(float newX);	
 	void MoveY(float newY);

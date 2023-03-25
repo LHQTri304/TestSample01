@@ -1,6 +1,7 @@
 #include "CPBall.h"
 
 //Constructor
+/*
 CPBall::CPBall(float xx, float vxx, float yy, float vyy)
 {
 	x = xx;
@@ -8,7 +9,7 @@ CPBall::CPBall(float xx, float vxx, float yy, float vyy)
 	y = yy;
 	vy = vyy;
 }
-
+*/
 
 // 4 get function
 float CPBall::GetX()
@@ -32,7 +33,7 @@ float CPBall::GetVY()
 }
 
 
-// 4 Set function
+// 5 Set function
 void CPBall::SetX(float XX)
 {
 	x = XX;
@@ -51,6 +52,14 @@ void CPBall::SetVX(float VXX)
 void CPBall::SetVY(float VYY)
 {
 	vy = VYY;
+}
+
+void CPBall::SetAllStats(float xx, float vxx, float yy, float vyy)
+{
+	x = xx;
+	vx = vxx;
+	y = yy;
+	vy = vyy;
 }
 
 
