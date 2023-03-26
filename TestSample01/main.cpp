@@ -67,8 +67,8 @@ int BackBufferHeight = 0;
 #define BALL_START_X WINDOW_WIDTH/2
 #define BALL_START_Y WINDOW_HEIGHT/2
 
-#define BALL_START_VX 1.5f
-#define BALL_START_VY 1.5f
+#define BALL_START_VX 0.2f
+#define BALL_START_VY 0.2f
 
 #define BALL_WIDTH 32.0f
 #define BALL_HEIGHT 32.0f
@@ -88,6 +88,7 @@ float ball_vy = BALL_START_VY;
 
 //Array of balls
 #define NUM_OF_BALLS 2
+int iball = 0;
 CPBall balls[NUM_OF_BALLS];
 void MoreBalls()
 {
@@ -358,55 +359,55 @@ void LoadResources()
 
 	IMPORTANT: no render-related code should be used inside this function.
 */
-void Update(DWORD dt)
+void Update(DWORD dt, int index)
 {
 	//Uncomment the whole function to see the ball moves and bounces back when hitting left and right edges
 	//ball_x++;
 	//ball_y++;
 
-	balls[1].MoveX(1);
-	balls[1].MoveY(1);
+	balls[index].MoveX(1);
+	balls[index].MoveY(1);
 	
 
 	//ball_x += ball_vx * dt;
 	//ball_y += ball_vy * dt;
 
-	balls[1].MoveX(balls[1].GetVX() * dt);
-	balls[1].MoveY(balls[1].GetVY() * dt);
+	balls[index].MoveX(balls[index].GetVX() * dt + index);
+	balls[index].MoveY(balls[index].GetVY() * dt + index);
 
 	// NOTE: BackBufferWidth is indeed related to rendering!!
 	float right_edge = BackBufferWidth - BALL_WIDTH / 2;
 	float bottom_edge = BackBufferHeight - BALL_HEIGHT / 2;
 
 	//Bounce when touch the edge
-	if (balls[1].GetX() <= BALL_WIDTH / 2 || balls[1].GetX() >= right_edge)
+	if (balls[index].GetX() <= BALL_WIDTH / 2 || balls[index].GetX() >= right_edge)
 	{
-		balls[1].MinusVX();
+		balls[index].MinusVX();
 
 		//Why not having these logics would make the ball disappear sometimes?  
 		// Because if the ball move so fast, even if we minus vx or vy, it can't come back.
-		if (balls[1].GetX() < BALL_WIDTH / 2)
+		if (balls[index].GetX() < BALL_WIDTH / 2)
 		{
-			balls[1].SetX(BALL_WIDTH / 2);
+			balls[index].SetX(BALL_WIDTH / 2);
 		}
-		else if (balls[1].GetX() > right_edge)
+		else if (balls[index].GetX() > right_edge)
 		{
-			balls[1].SetX(right_edge);
+			balls[index].SetX(right_edge);
 		}
 	}
-	if (balls[1].GetY() <= BALL_HEIGHT / 2 || balls[1].GetY() >= bottom_edge)
+	if (balls[index].GetY() <= BALL_HEIGHT / 2 || balls[index].GetY() >= bottom_edge)
 	{
-		balls[1].MinusVY();
+		balls[index].MinusVY();
 
 		//Why not having these logics would make the ball disappear sometimes?  
 		// Because if the ball move so fast, even if we minus vx or vy, it can't come back.
-		if (balls[1].GetY() < BALL_HEIGHT / 2)
+		if (balls[index].GetY() < BALL_HEIGHT / 2)
 		{
-			balls[1].SetY(BALL_HEIGHT / 2);
+			balls[index].SetY(BALL_HEIGHT / 2);
 		}
-		else if (balls[1].GetY() > bottom_edge)
+		else if (balls[index].GetY() > bottom_edge)
 		{
-			balls[1].SetY(bottom_edge);
+			balls[index].SetY(bottom_edge);
 		}
 	}
 }
@@ -415,7 +416,7 @@ void Update(DWORD dt)
 	Render a frame
 	IMPORTANT: world status must NOT be changed during rendering
 */
-void Render()
+void Render(int index)
 {
 	if (pD3DDevice != NULL)
 	{
@@ -430,7 +431,8 @@ void Render()
 		// Create the translation matrix
 		//D3DXMatrixTranslation(&matTranslation, ball_x, (BackBufferHeight - ball_y), 0.1f);
 
-		D3DXMatrixTranslation(&matTranslation, balls[1].GetX(), (BackBufferHeight - balls[1].GetY()), 0.1f);
+		D3DXMatrixTranslation(&matTranslation, balls[index].GetX(), (BackBufferHeight - balls[index].GetY()), 0.1f);
+		//D3DXMatrixTranslation(&matTranslation, balls[index].GetX(), (BackBufferHeight - balls[index].GetY()), 0.1f);
 
 		// Scale the sprite to its correct width and height
 		D3DXMATRIX matScaling;
@@ -527,8 +529,12 @@ int Run()
 		if (dt >= tickPerFrame)
 		{
 			frameStart = now;
-			Update((DWORD)dt);
-			Render();
+			//Add index for balls
+			if (iball == NUM_OF_BALLS)
+				iball = 0;
+			Update((DWORD)dt, iball);
+			Render(iball);
+			iball++;
 		}
 		else
 			Sleep((DWORD)(tickPerFrame - dt));
@@ -580,6 +586,7 @@ int WINAPI WinMain(
 	InitDirectX(hWnd);
 
 	LoadResources();
+	//LoadResources();
 	Run();
 	Cleanup();
 
