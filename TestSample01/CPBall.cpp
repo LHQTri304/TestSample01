@@ -54,7 +54,7 @@ void CPBall::SetVY(float VYY)
 	vy = VYY;
 }
 
-void CPBall::SetAllStats(float xx, float vxx, float yy, float vyy)
+void CPBall::SetAllStats(float xx, float yy, float vxx, float vyy)
 {
 	x = xx;
 	vx = vxx;

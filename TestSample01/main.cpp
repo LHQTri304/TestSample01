@@ -39,6 +39,9 @@ WARNING: This one file example has a hell LOT of *sinful* programming practices
 
 #include <comdef.h>
 
+#include "CPBall.h"
+
+
 #define WINDOW_CLASS_NAME L"SampleWindow"
 #define WINDOW_TITLE L"00 - Intro"
 #define WINDOW_ICON_PATH L"brick.ico" 
@@ -76,10 +79,23 @@ ID3DX10Sprite* spriteObject = NULL;				// Sprite handling object
 
 D3DX10_SPRITE spriteBall;
 
+/*
 float ball_x = BALL_START_X;
 float ball_vx = BALL_START_VX;
 float ball_y = BALL_START_Y;
 float ball_vy = BALL_START_VY;
+*/
+
+//Array of balls
+#define NUM_OF_BALLS 2
+CPBall balls[NUM_OF_BALLS];
+void MoreBalls()
+{
+	for (int i = 0; i < NUM_OF_BALLS; i++)
+	{
+		balls[i].SetAllStats(BALL_START_X, BALL_START_Y, BALL_START_VX, BALL_START_VY);
+	}
+}
 
 
 LRESULT CALLBACK WinProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
@@ -345,45 +361,52 @@ void LoadResources()
 void Update(DWORD dt)
 {
 	//Uncomment the whole function to see the ball moves and bounces back when hitting left and right edges
-	ball_x++;
-	ball_y++;
+	//ball_x++;
+	//ball_y++;
 
-	ball_x += ball_vx * dt;
-	ball_y += ball_vy * dt;
+	balls[1].MoveX(1);
+	balls[1].MoveY(1);
+	
+
+	//ball_x += ball_vx * dt;
+	//ball_y += ball_vy * dt;
+
+	balls[1].MoveX(balls[1].GetVX() * dt);
+	balls[1].MoveY(balls[1].GetVY() * dt);
 
 	// NOTE: BackBufferWidth is indeed related to rendering!!
 	float right_edge = BackBufferWidth - BALL_WIDTH / 2;
 	float bottom_edge = BackBufferHeight - BALL_HEIGHT / 2;
 
 	//Bounce when touch the edge
-	if (ball_x <= BALL_WIDTH / 2 || ball_x >= right_edge)
+	if (balls[1].GetX() <= BALL_WIDTH / 2 || balls[1].GetX() >= right_edge)
 	{
-		ball_vx = -ball_vx;
+		balls[1].MinusVX();
 
 		//Why not having these logics would make the ball disappear sometimes?  
 		// Because if the ball move so fast, even if we minus vx or vy, it can't come back.
-		if (ball_x < BALL_WIDTH / 2)
+		if (balls[1].GetX() < BALL_WIDTH / 2)
 		{
-			ball_x = BALL_WIDTH / 2;
+			balls[1].SetX(BALL_WIDTH / 2);
 		}
-		else if (ball_x > right_edge)
+		else if (balls[1].GetX() > right_edge)
 		{
-			ball_x = right_edge;
+			balls[1].SetX(right_edge);
 		}
 	}
-	if (ball_y <= BALL_HEIGHT / 2 || ball_y >= bottom_edge)
+	if (balls[1].GetY() <= BALL_HEIGHT / 2 || balls[1].GetY() >= bottom_edge)
 	{
-		ball_vy = -ball_vy;
+		balls[1].MinusVY();
 
 		//Why not having these logics would make the ball disappear sometimes?  
 		// Because if the ball move so fast, even if we minus vx or vy, it can't come back.
-		if (ball_y < BALL_HEIGHT / 2)
+		if (balls[1].GetY() < BALL_HEIGHT / 2)
 		{
-			ball_y = BALL_HEIGHT / 2;
+			balls[1].SetY(BALL_HEIGHT / 2);
 		}
-		else if (ball_y > bottom_edge)
+		else if (balls[1].GetY() > bottom_edge)
 		{
-			ball_y = bottom_edge;
+			balls[1].SetY(bottom_edge);
 		}
 	}
 }
@@ -405,7 +428,9 @@ void Render()
 		// The translation matrix to be created
 		D3DXMATRIX matTranslation;
 		// Create the translation matrix
-		D3DXMatrixTranslation(&matTranslation, ball_x, (BackBufferHeight - ball_y), 0.1f);
+		//D3DXMatrixTranslation(&matTranslation, ball_x, (BackBufferHeight - ball_y), 0.1f);
+
+		D3DXMatrixTranslation(&matTranslation, balls[1].GetX(), (BackBufferHeight - balls[1].GetY()), 0.1f);
 
 		// Scale the sprite to its correct width and height
 		D3DXMATRIX matScaling;
@@ -546,6 +571,9 @@ int WINAPI WinMain(
 	_In_ int nCmdShow
 )
 {
+	//more balls here...
+	MoreBalls();
+
 	hWnd = CreateGameWindow(hInstance, nCmdShow, WINDOW_WIDTH, WINDOW_HEIGHT);
 	if (hWnd == 0) return 0;
 
