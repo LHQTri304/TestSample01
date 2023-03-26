@@ -67,8 +67,8 @@ int BackBufferHeight = 0;
 #define BALL_START_X WINDOW_WIDTH/2
 #define BALL_START_Y WINDOW_HEIGHT/2
 
-#define BALL_START_VX 0.2f
-#define BALL_START_VY 0.2f
+#define BALL_START_VX 0.5f
+#define BALL_START_VY 0.5f
 
 #define BALL_WIDTH 32.0f
 #define BALL_HEIGHT 32.0f
@@ -87,7 +87,7 @@ float ball_vy = BALL_START_VY;
 */
 
 //Array of balls
-#define NUM_OF_BALLS 2
+#define NUM_OF_BALLS 5
 int iball = 0;
 CPBall balls[NUM_OF_BALLS];
 void MoreBalls()
@@ -359,92 +359,98 @@ void LoadResources()
 
 	IMPORTANT: no render-related code should be used inside this function.
 */
-void Update(DWORD dt, int index)
+void Update(DWORD dt)
 {
+	if (iball == NUM_OF_BALLS)
+		iball = 0;
 	//Uncomment the whole function to see the ball moves and bounces back when hitting left and right edges
 	//ball_x++;
 	//ball_y++;
 
-	balls[index].MoveX(1);
-	balls[index].MoveY(1);
+	balls[iball].MoveX(1);
+	balls[iball].MoveY(1);
 	
 
 	//ball_x += ball_vx * dt;
 	//ball_y += ball_vy * dt;
 
-	balls[index].MoveX(balls[index].GetVX() * dt + index);
-	balls[index].MoveY(balls[index].GetVY() * dt + index);
+	balls[iball].MoveX(balls[iball].GetVX() * dt + iball);
+	balls[iball].MoveY(balls[iball].GetVY() * dt + iball);
 
 	// NOTE: BackBufferWidth is indeed related to rendering!!
 	float right_edge = BackBufferWidth - BALL_WIDTH / 2;
 	float bottom_edge = BackBufferHeight - BALL_HEIGHT / 2;
 
 	//Bounce when touch the edge
-	if (balls[index].GetX() <= BALL_WIDTH / 2 || balls[index].GetX() >= right_edge)
+	if (balls[iball].GetX() <= BALL_WIDTH / 2 || balls[iball].GetX() >= right_edge)
 	{
-		balls[index].MinusVX();
+		balls[iball].MinusVX();
 
 		//Why not having these logics would make the ball disappear sometimes?  
 		// Because if the ball move so fast, even if we minus vx or vy, it can't come back.
-		if (balls[index].GetX() < BALL_WIDTH / 2)
+		if (balls[iball].GetX() < BALL_WIDTH / 2)
 		{
-			balls[index].SetX(BALL_WIDTH / 2);
+			balls[iball].SetX(BALL_WIDTH / 2);
 		}
-		else if (balls[index].GetX() > right_edge)
+		else if (balls[iball].GetX() > right_edge)
 		{
-			balls[index].SetX(right_edge);
+			balls[iball].SetX(right_edge);
 		}
 	}
-	if (balls[index].GetY() <= BALL_HEIGHT / 2 || balls[index].GetY() >= bottom_edge)
+	if (balls[iball].GetY() <= BALL_HEIGHT / 2 || balls[iball].GetY() >= bottom_edge)
 	{
-		balls[index].MinusVY();
+		balls[iball].MinusVY();
 
 		//Why not having these logics would make the ball disappear sometimes?  
 		// Because if the ball move so fast, even if we minus vx or vy, it can't come back.
-		if (balls[index].GetY() < BALL_HEIGHT / 2)
+		if (balls[iball].GetY() < BALL_HEIGHT / 2)
 		{
-			balls[index].SetY(BALL_HEIGHT / 2);
+			balls[iball].SetY(BALL_HEIGHT / 2);
 		}
-		else if (balls[index].GetY() > bottom_edge)
+		else if (balls[iball].GetY() > bottom_edge)
 		{
-			balls[index].SetY(bottom_edge);
+			balls[iball].SetY(bottom_edge);
 		}
 	}
+
+	iball++;
 }
 
 /*
 	Render a frame
 	IMPORTANT: world status must NOT be changed during rendering
 */
-void Render(int index)
+void Render()
 {
 	if (pD3DDevice != NULL)
 	{
 		// clear the target buffer
 		pD3DDevice->ClearRenderTargetView(pRenderTargetView, BACKGROUND_COLOR);
 
-		// start drawing the sprites
-		spriteObject->Begin(D3DX10_SPRITE_SORT_TEXTURE);
+		for (int index = 0; index < NUM_OF_BALLS; index++)
+		{
+			// start drawing the sprites
+			spriteObject->Begin(D3DX10_SPRITE_SORT_TEXTURE);
 
-		// The translation matrix to be created
-		D3DXMATRIX matTranslation;
-		// Create the translation matrix
-		//D3DXMatrixTranslation(&matTranslation, ball_x, (BackBufferHeight - ball_y), 0.1f);
+			// The translation matrix to be created
+			D3DXMATRIX matTranslation;
+			// Create the translation matrix
+			//D3DXMatrixTranslation(&matTranslation, ball_x, (BackBufferHeight - ball_y), 0.1f);
 
-		D3DXMatrixTranslation(&matTranslation, balls[index].GetX(), (BackBufferHeight - balls[index].GetY()), 0.1f);
-		//D3DXMatrixTranslation(&matTranslation, balls[index].GetX(), (BackBufferHeight - balls[index].GetY()), 0.1f);
+			D3DXMatrixTranslation(&matTranslation, balls[index].GetX(), (BackBufferHeight - balls[index].GetY()), 0.1f);
 
-		// Scale the sprite to its correct width and height
-		D3DXMATRIX matScaling;
-		D3DXMatrixScaling(&matScaling, BALL_WIDTH, BALL_HEIGHT, 1.0f);
+			// Scale the sprite to its correct width and height
+			D3DXMATRIX matScaling;
+			D3DXMatrixScaling(&matScaling, BALL_WIDTH, BALL_HEIGHT, 1.0f);
 
-		// Setting the sprite’s position and size
-		spriteBall.matWorld = (matScaling * matTranslation);
+			// Setting the sprite’s position and size
+			spriteBall.matWorld = (matScaling * matTranslation);
 
-		spriteObject->DrawSpritesImmediate(&spriteBall, 1, 0, 0);
+			spriteObject->DrawSpritesImmediate(&spriteBall, 1, 0, 0);
 
-		// Finish up and send the sprites to the hardware
-		spriteObject->End();
+			// Finish up and send the sprites to the hardware
+			spriteObject->End();
+		}
 
 		//DebugOutTitle((wchar_t*)L"%s (%0.1f,%0.1f) v:%0.1f", WINDOW_TITLE, ball_x, ball_y, ball_vx);
 
@@ -529,12 +535,8 @@ int Run()
 		if (dt >= tickPerFrame)
 		{
 			frameStart = now;
-			//Add index for balls
-			if (iball == NUM_OF_BALLS)
-				iball = 0;
-			Update((DWORD)dt, iball);
-			Render(iball);
-			iball++;
+			Update((DWORD)dt);
+			Render();
 		}
 		else
 			Sleep((DWORD)(tickPerFrame - dt));
