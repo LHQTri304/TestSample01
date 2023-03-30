@@ -54,7 +54,7 @@ HWND hWnd = 0;
 #define WINDOW_WIDTH 640
 #define WINDOW_HEIGHT 480
 
-#define MAX_FRAME_RATE 100
+#define MAX_FRAME_RATE 600
 
 ID3D10Device* pD3DDevice = NULL;
 IDXGISwapChain* pSwapChain = NULL;
@@ -92,9 +92,11 @@ int iball = 0;
 CPBall balls[NUM_OF_BALLS];
 void MoreBalls()
 {
+	int minusV = -1;
 	for (int i = 0; i < NUM_OF_BALLS; i++)
 	{
-		balls[i].SetAllStats(BALL_START_X, BALL_START_Y, BALL_START_VX, BALL_START_VY);
+		balls[i].SetAllStats(BALL_START_X, BALL_START_Y,-minusV * BALL_START_VX, -minusV * BALL_START_VY);
+		minusV = -minusV;
 	}
 }
 
@@ -378,34 +380,36 @@ void Update(DWORD dt)
 	balls[iball].MoveY(balls[iball].GetVY() * dt + iball);
 
 	// NOTE: BackBufferWidth is indeed related to rendering!!
-	float right_edge = BackBufferWidth - BALL_WIDTH / 2;
-	float bottom_edge = BackBufferHeight - BALL_HEIGHT / 2;
+	float ball_to_edge_width = BALL_WIDTH / 2;
+	float ball_to_edge_height = BALL_HEIGHT / 2;
+	float right_edge = BackBufferWidth - ball_to_edge_width;
+	float bottom_edge = BackBufferHeight - ball_to_edge_height;
 
 	//Bounce when touch the edge
-	if (balls[iball].GetX() <= BALL_WIDTH / 2 || balls[iball].GetX() >= right_edge)
+	if (balls[iball].GetX() <= ball_to_edge_width || balls[iball].GetX() >= right_edge)
 	{
 		balls[iball].MinusVX();
 
 		//Why not having these logics would make the ball disappear sometimes?  
 		// Because if the ball move so fast, even if we minus vx or vy, it can't come back.
-		if (balls[iball].GetX() < BALL_WIDTH / 2)
+		if (balls[iball].GetX() < ball_to_edge_width)
 		{
-			balls[iball].SetX(BALL_WIDTH / 2);
+			balls[iball].SetX(ball_to_edge_width);
 		}
 		else if (balls[iball].GetX() > right_edge)
 		{
 			balls[iball].SetX(right_edge);
 		}
 	}
-	if (balls[iball].GetY() <= BALL_HEIGHT / 2 || balls[iball].GetY() >= bottom_edge)
+	if (balls[iball].GetY() <= ball_to_edge_height || balls[iball].GetY() >= bottom_edge)
 	{
 		balls[iball].MinusVY();
 
 		//Why not having these logics would make the ball disappear sometimes?  
 		// Because if the ball move so fast, even if we minus vx or vy, it can't come back.
-		if (balls[iball].GetY() < BALL_HEIGHT / 2)
+		if (balls[iball].GetY() < ball_to_edge_height)
 		{
-			balls[iball].SetY(BALL_HEIGHT / 2);
+			balls[iball].SetY(ball_to_edge_height);
 		}
 		else if (balls[iball].GetY() > bottom_edge)
 		{
