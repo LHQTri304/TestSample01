@@ -43,13 +43,16 @@ WARNING: This one file example has a hell LOT of *sinful* programming practices
 
 
 #define WINDOW_CLASS_NAME L"SampleWindow"
-#define WINDOW_TITLE L"00 - Intro"
-#define WINDOW_ICON_PATH L"brick.ico" 
+//#define WINDOW_TITLE L"00 - Intro"
+#define WINDOW_TITLE L"Testing Title 001 (checked)"
+//#define WINDOW_ICON_PATH L"brick.ico" 
+#define WINDOW_ICON_PATH L"poolball.ico" 
 
 HWND hWnd = 0;
 
 // Each color is from 0.0f to 1.0f  ( 0/255 to 255/255 ) 
-#define BACKGROUND_COLOR D3DXCOLOR(0.2f, 0.2f, 0.2f, 0.2f)
+//#define BACKGROUND_COLOR D3DXCOLOR(0.2f, 0.2f, 0.2f, 0.2f)
+#define BACKGROUND_COLOR D3DXCOLOR(0.5f, 0.5f, 0.5f, 0.5f)
 
 #define WINDOW_WIDTH 640
 #define WINDOW_HEIGHT 480
@@ -87,16 +90,21 @@ float ball_vy = BALL_START_VY;
 */
 
 //Array of balls
-#define NUM_OF_BALLS 5
+#define NUM_OF_BALLS 4
 int iball = 0;
 CPBall balls[NUM_OF_BALLS];
 void MoreBalls()
 {
-	int minusV = -1;
+	int minusVx = 1;
+	int minusVy = 1;
 	for (int i = 0; i < NUM_OF_BALLS; i++)
 	{
-		balls[i].SetAllStats(BALL_START_X, BALL_START_Y,-minusV * BALL_START_VX, -minusV * BALL_START_VY);
-		minusV = -minusV;
+		if (i % 2 == 1)
+			minusVx = -minusVx;
+		else
+			minusVy = -minusVy;
+			
+		balls[i].SetAllStats(BALL_START_X, BALL_START_Y,minusVx * BALL_START_VX, minusVy * BALL_START_VY);
 	}
 }
 
