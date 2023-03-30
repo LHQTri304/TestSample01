@@ -384,8 +384,11 @@ void Update(DWORD dt)
 	//ball_x += ball_vx * dt;
 	//ball_y += ball_vy * dt;
 
-	balls[iball].MoveX(balls[iball].GetVX() * dt + iball);
-	balls[iball].MoveY(balls[iball].GetVY() * dt + iball);
+	//int ranV = iball;
+	int ranV = rand() % 10;
+
+	balls[iball].MoveX(balls[iball].GetVX() * dt + ranV);
+	balls[iball].MoveY(balls[iball].GetVY() * dt + ranV);
 
 	// NOTE: BackBufferWidth is indeed related to rendering!!
 	float ball_to_edge_width = BALL_WIDTH / 2;
